@@ -193,3 +193,8 @@
 
 ### GitHub
 - [x] Tüm güncellemeleri GitHub'a push etme
+
+## Yeni Güncellemeler (v3.6)
+
+- [x] Kullanıcı profil sayfasına hafta filtresi ekleme
+- [x] Puan tablosunu sıfırlama

@@ -4,7 +4,8 @@ import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Loader2, ArrowLeft, User, Trophy, TrendingUp, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, ArrowLeft, User, Trophy, TrendingUp, CheckCircle, XCircle, Calendar } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar } from "@/components/Avatar";
 import { getTeamLogo } from "@/lib/teamLogos";
 
@@ -12,6 +13,7 @@ export default function UserProfile() {
   const { userId } = useParams();
   const { user: currentUser, loading: authLoading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
+  const [selectedWeek, setSelectedWeek] = useState<string>("all");
 
   const { data: userPredictions, isLoading: predictionsLoading } = trpc.predictions.byUser.useQuery(
     { userId: parseInt(userId!) },
@@ -139,13 +141,36 @@ export default function UserProfile() {
         {/* Predictions History */}
         <Card>
           <CardHeader>
-            <CardTitle>Tahmin Geçmişi</CardTitle>
-            <CardDescription>Kullanıcının tüm tahminleri</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Tahmin Geçmişi</CardTitle>
+                <CardDescription>Kullanıcının tüm tahminleri</CardDescription>
+              </div>
+              <Select value={selectedWeek} onValueChange={setSelectedWeek}>
+                <SelectTrigger className="w-[180px]">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Hafta Seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tüm Haftalar</SelectItem>
+                  {Array.from(new Set(userPredictions?.map((p: any) => {
+                    const match = getMatchInfo(p.matchId);
+                    return match?.week;
+                  }).filter(Boolean))).sort((a: any, b: any) => a - b).map((week: any) => (
+                    <SelectItem key={week} value={week.toString()}>Hafta {week}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </CardHeader>
           <CardContent>
             {userPredictions && userPredictions.length > 0 ? (
               <div className="space-y-4">
-                {userPredictions.map((prediction: any) => {
+                {userPredictions.filter((prediction: any) => {
+                  if (selectedWeek === "all") return true;
+                  const match = getMatchInfo(prediction.matchId);
+                  return match?.week === parseInt(selectedWeek);
+                }).map((prediction: any) => {
                   const match = getMatchInfo(prediction.matchId);
                   if (!match) return null;
 

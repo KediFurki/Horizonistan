@@ -45,7 +45,7 @@ export default function Login() {
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
             <img 
-              src="/logos/Ana-sayfa-giriş.png" 
+              src="/logos/login-logo.png" 
               alt="Horizonistan Logo" 
               className="h-32 w-auto object-contain"
             />

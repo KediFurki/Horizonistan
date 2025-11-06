@@ -183,6 +183,26 @@ export default function AdminPredictions() {
                           </span>
                         </div>
                       </div>
+
+                      {/* Official Result */}
+                      {match.isFinished && (
+                        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border-2 border-green-500 dark:border-green-700">
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            <Trophy className="h-4 w-4 text-green-600" />
+                            <span className="text-xs font-medium text-green-700 dark:text-green-400">Resmi Sonuç</span>
+                          </div>
+                          <div className="text-center space-y-1">
+                            <div className="text-2xl font-bold text-green-600">
+                              {match.homeScore} - {match.awayScore}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              {(match.homeScore ?? 0) > (match.awayScore ?? 0) ? `${match.homeTeam} Kazanır` :
+                               (match.homeScore ?? 0) < (match.awayScore ?? 0) ? `${match.awayTeam} Kazanır` :
+                               "Beraberlik"}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

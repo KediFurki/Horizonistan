@@ -124,3 +124,21 @@
 - [x] Hangi kullanıcının hangi maçta ne tahmin ettiğini gösterme
 - [x] Görsel tahmin kartları (kullanıcı adı, skor, sonuç seçimi)
 - [x] Maça göre filtreleme özelliği
+
+## Hata Düzeltmeleri (v3.1)
+
+### Premier League Logosu
+- [x] Ana sayfadaki Premier League logosunun görünmeme sorunu
+
+### Puan Sistemi Hatası
+- [x] Puan hesaplama mantığını kontrol etme
+- [x] Sadece sonuç: 1 puan (doğru)
+- [x] Tam skor: 3 puan (doğru)
+- [x] Mevcut puanları sıfırlama ve yeniden hesaplama
+
+### Admin Tahmin Detayları
+- [x] Tahmin kartlarına resmi skor ekleme
+- [x] Resmi sonuç gösterimi
+
+### Liderlik Tablosu
+- [x] Açıklama metnini güncelleme (1 puan sonuç, 3 puan skor)

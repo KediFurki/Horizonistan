@@ -88,7 +88,7 @@ export default function Leaderboard() {
           <CardHeader>
             <CardTitle>Sıralama</CardTitle>
             <CardDescription>
-              Puanlama: Doğru sonuç 3 puan, tam skor 8 puan (3+5 bonus)
+              Puanlama: Sadece sonuç 1 puan, tam skor 3 puan
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -171,12 +171,12 @@ export default function Leaderboard() {
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <span className="font-medium">Doğru Sonuç Tahmini</span>
-              <Badge className="bg-green-600">+3 Puan</Badge>
+              <span className="font-medium">Sadece Sonuç Tahmini</span>
+              <Badge className="bg-green-600">+1 Puan</Badge>
             </div>
             <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
               <span className="font-medium">Tam Skor İsabeti</span>
-              <Badge className="bg-blue-600">+8 Puan (3+5 bonus)</Badge>
+              <Badge className="bg-blue-600">+3 Puan</Badge>
             </div>
             <p className="text-sm text-muted-foreground mt-4">
               * Sonuç tahmini: Hangi takımın kazanacağını veya berabere kalacağını doğru tahmin etmek

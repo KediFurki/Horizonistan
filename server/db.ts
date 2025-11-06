@@ -560,10 +560,36 @@ export async function getLeaderboard(limit: number = 100): Promise<UserScore[]> 
 /**
  * Get user score by user ID
  */
-export async function getUserScore(userId: number): Promise<UserScore | undefined> {
+export async function getUserScore(userId: number): Promise<UserScore> {
   const db = await getDb();
-  if (!db) return undefined;
+  if (!db) {
+    return {
+      id: 0,
+      userId,
+      totalPoints: 0,
+      correctResults: 0,
+      correctScores: 0,
+      totalPredictions: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+  }
 
   const result = await db.select().from(userScores).where(eq(userScores.userId, userId)).limit(1);
-  return result.length > 0 ? result[0] : undefined;
+  
+  if (result.length > 0) {
+    return result[0];
+  }
+  
+  // Return default values if user has no score yet
+  return {
+    id: 0,
+    userId,
+    totalPoints: 0,
+    correctResults: 0,
+    correctScores: 0,
+    totalPredictions: 0,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 }

@@ -241,7 +241,7 @@ export default function MatchDetail() {
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <span className="font-semibold">Kullanıcı #{comment.userId}</span>
+                          <span className="font-semibold">{comment.username}</span>
                           <span className="text-sm text-muted-foreground ml-2">
                             {new Date(comment.createdAt).toLocaleString("tr-TR")}
                           </span>

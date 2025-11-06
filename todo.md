@@ -75,3 +75,27 @@
 - [x] Giriş/kayıt sayfası için özel logo ekleme
 - [x] Ana menüde Premier League logosu kullanma
 - [x] Logo dosyalarını projeye ekleme
+
+## Hata Düzeltmeleri ve Yeni Özellikler (v2.1)
+
+### Hata Düzeltmeleri
+- [x] Login sayfası 404 hatası düzeltme
+- [x] Yorum yapan kullanıcı adını gerçek kullanıcı adıyla gösterme
+
+### Puanlama Sistemi
+- [x] Skor ve sonuç tahminini ayrı puanlama sistemine dönüştürme
+- [x] Sonuç tahmini (kazanan/beraberlik) için ana puan (3 puan)
+- [x] Skor tahmini için bonus puan (5 puan)
+- [x] Veritabanına puan tablosu ekleme
+
+### Liderlik Tablosu
+- [x] Liderlik tablosu sayfası oluşturma
+- [x] Kullanıcıların toplam doğru tahmin sayılarını hesaplama
+- [x] Puan sistemine göre sıralama
+- [x] Ana menüye liderlik tablosu linki ekleme
+
+### Admin Resmi Skor Girişi
+- [x] Admin paneline resmi skor girişi formu ekleme
+- [x] Maç bittiğinde resmi skorları kaydetme
+- [x] Ana sayfada resmi skorları gösterme (kullanıcı tahmininin üstünde)
+- [x] Resmi skor girildikten sonra puanları otomatik hesaplama

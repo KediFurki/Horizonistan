@@ -10,12 +10,15 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Admin from "./pages/Admin";
 import AdminPredictions from "./pages/AdminPredictions";
+import Leaderboard from "./pages/Leaderboard";
 
 function Router() {
   return (
-    <Switch>      <Route path={"/"} component={Home} />
+    <Switch>
+      <Route path={"/"} component={Home} />
       <Route path="/match/:id" component={MatchDetail} />
-      <Route path={"/404"} component={NotFound} />
+      <Route path={"/leaderboard"} component={Leaderboard} />
+      <Route path={"/login"} component={Login} />
       <Route path={"/register"} component={Register} />
       <Route path={"/admin"} component={Admin} />
       <Route path={"/admin/predictions"} component={AdminPredictions} />

@@ -181,6 +181,11 @@ export const appRouter = router({
         const { id, homeTeamForm, awayTeamForm, ...matchData } = input;
         
         const match = await db.updateMatch(id, matchData);
+        
+        // If match is marked as finished and has scores, calculate points
+        if (input.isFinished && input.homeScore !== undefined && input.awayScore !== undefined) {
+          await db.recalculateMatchScores(id);
+        }
 
         // Update team stats if provided
         const existingStats = await db.getTeamStatsByMatchId(id);
@@ -305,6 +310,30 @@ export const appRouter = router({
         await db.deleteComment(input.commentId);
         return { success: true };
       }),
+  }),
+
+  // Leaderboard
+  leaderboard: router({
+    list: publicProcedure.query(async () => {
+      const scores = await db.getLeaderboard(100);
+      
+      // Get user details for each score
+      const leaderboard = await Promise.all(
+        scores.map(async (score) => {
+          const user = await db.getUserById(score.userId);
+          return {
+            ...score,
+            username: user?.username || user?.name || `User #${score.userId}`,
+          };
+        })
+      );
+      
+      return leaderboard;
+    }),
+
+    myScore: protectedProcedure.query(async ({ ctx }) => {
+      return await db.getUserScore(ctx.user.id);
+    }),
   }),
 });
 

@@ -25,6 +25,10 @@ export default function Admin() {
   const [day, setDay] = useState("");
   const [homeTeamForm, setHomeTeamForm] = useState("");
   const [awayTeamForm, setAwayTeamForm] = useState("");
+  const [scoreDialogOpen, setScoreDialogOpen] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState<any>(null);
+  const [homeScore, setHomeScore] = useState("");
+  const [awayScore, setAwayScore] = useState("");
 
   const utils = trpc.useUtils();
   const { data: matches, isLoading: matchesLoading } = trpc.matches.list.useQuery();
@@ -123,6 +127,36 @@ export default function Admin() {
     if (confirm("Bu maçı silmek istediğinizden emin misiniz?")) {
       deleteMatchMutation.mutate({ id });
     }
+  };
+
+  const handleScoreEntry = (match: any) => {
+    setSelectedMatch(match);
+    setHomeScore(match.homeScore?.toString() || "");
+    setAwayScore(match.awayScore?.toString() || "");
+    setScoreDialogOpen(true);
+  };
+
+  const handleScoreSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!homeScore || !awayScore) {
+      toast.error("Lütfen her iki takımın skorunu girin");
+      return;
+    }
+
+    updateMatchMutation.mutate({
+      id: selectedMatch.id,
+      homeScore: parseInt(homeScore),
+      awayScore: parseInt(awayScore),
+      isFinished: true,
+    }, {
+      onSuccess: () => {
+        setScoreDialogOpen(false);
+        setSelectedMatch(null);
+        setHomeScore("");
+        setAwayScore("");
+      }
+    });
   };
 
   const handleLogout = async () => {
@@ -351,6 +385,14 @@ export default function Admin() {
                     </div>
                     <div className="flex gap-2">
                       <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => handleScoreEntry(match)}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        {match.isFinished ? "Skoru Güncelle" : "Resmi Skor Gir"}
+                      </Button>
+                      <Button
                         variant="outline"
                         size="icon"
                         onClick={() => handleEdit(match)}
@@ -377,7 +419,71 @@ export default function Admin() {
               <p className="text-muted-foreground">Henüz maç eklenmemiş</p>
             </CardContent>
           </Card>
-        )}
+             )}
+
+        {/* Score Entry Dialog */}
+        <Dialog open={scoreDialogOpen} onOpenChange={setScoreDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Resmi Skor Gir</DialogTitle>
+              <DialogDescription>
+                {selectedMatch && `${selectedMatch.homeTeam} vs ${selectedMatch.awayTeam}`}
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleScoreSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="homeScore">{selectedMatch?.homeTeam} Skoru</Label>
+                  <Input
+                    id="homeScore"
+                    type="number"
+                    min="0"
+                    value={homeScore}
+                    onChange={(e) => setHomeScore(e.target.value)}
+                    placeholder="0"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="awayScore">{selectedMatch?.awayTeam} Skoru</Label>
+                  <Input
+                    id="awayScore"
+                    type="number"
+                    min="0"
+                    value={awayScore}
+                    onChange={(e) => setAwayScore(e.target.value)}
+                    placeholder="0"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button
+                  type="submit"
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  disabled={updateMatchMutation.isPending}
+                >
+                  {updateMatchMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Kaydediliyor...
+                    </>
+                  ) : (
+                    "Kaydet"
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setScoreDialogOpen(false)}
+                  disabled={updateMatchMutation.isPending}
+                >
+                  İptal
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

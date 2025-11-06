@@ -109,3 +109,23 @@ export const comments = mysqlTable("comments", {
 
 export type Comment = typeof comments.$inferSelect;
 export type InsertComment = typeof comments.$inferInsert;
+
+/**
+ * User scores table - stores points earned from predictions
+ */
+export const userScores = mysqlTable("userScores", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  
+  // Points breakdown
+  totalPoints: int("totalPoints").default(0).notNull(),
+  correctResults: int("correctResults").default(0).notNull(), // Number of correct match results
+  correctScores: int("correctScores").default(0).notNull(), // Number of exact score predictions
+  totalPredictions: int("totalPredictions").default(0).notNull(),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type UserScore = typeof userScores.$inferSelect;
+export type InsertUserScore = typeof userScores.$inferInsert;

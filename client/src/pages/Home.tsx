@@ -232,6 +232,10 @@ export default function Home() {
               </div>
             </div>
             <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setLocation("/leaderboard")}>
+                <Trophy className="h-4 w-4 mr-2" />
+                Liderlik
+              </Button>
               {user?.role === "admin" && (
                 <Button variant="outline" onClick={() => setLocation("/admin")}>
                   Admin Paneli
@@ -322,6 +326,17 @@ export default function Home() {
                             <FormDisplay form={match.awayTeamForm} />
                           </div>
                         </div>
+
+                        {match.isFinished && (
+                          <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border-2 border-green-500 dark:border-green-700 mb-3">
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="font-medium text-green-700 dark:text-green-300">⚽ Resmi Skor:</span>
+                              <span className="font-bold text-green-600 dark:text-green-400 text-lg">
+                                {match.homeScore} - {match.awayScore}
+                              </span>
+                            </div>
+                          </div>
+                        )}
 
                         {userPrediction && (
                           <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-800 mb-3">

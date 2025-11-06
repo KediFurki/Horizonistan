@@ -1,6 +1,6 @@
 import { eq, and, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, matches, Match, InsertMatch, teamStats, TeamStat, InsertTeamStat, predictions, Prediction, InsertPrediction, comments, Comment, InsertComment } from "../drizzle/schema";
+import { InsertUser, users, matches, Match, InsertMatch, teamStats, TeamStat, InsertTeamStat, predictions, Prediction, InsertPrediction, comments, Comment, InsertComment, userScores, UserScore, InsertUserScore } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import bcrypt from 'bcryptjs';
 
@@ -359,15 +359,28 @@ export async function createComment(comment: InsertComment): Promise<Comment> {
   return inserted[0];
 }
 
-export async function getCommentsByMatchId(matchId: number): Promise<Comment[]> {
+export async function getCommentsByMatchId(matchId: number): Promise<(Comment & { username: string })[]> {
   const db = await getDb();
   if (!db) return [];
 
-  return await db
+  const commentsList = await db
     .select()
     .from(comments)
     .where(eq(comments.matchId, matchId))
     .orderBy(desc(comments.createdAt));
+
+  // Get usernames for each comment
+  const commentsWithUsernames = await Promise.all(
+    commentsList.map(async (comment) => {
+      const user = await getUserById(comment.userId);
+      return {
+        ...comment,
+        username: user?.username || user?.name || `User #${comment.userId}`,
+      };
+    })
+  );
+
+  return commentsWithUsernames;
 }
 
 export async function deleteComment(commentId: number): Promise<void> {
@@ -436,4 +449,121 @@ export async function canMakePrediction(matchId: number): Promise<boolean> {
   const thirtyMinutesBeforeMatch = new Date(matchDate.getTime() - 30 * 60 * 1000);
 
   return now < thirtyMinutesBeforeMatch;
+}
+
+// ============================================
+// USER SCORES & LEADERBOARD
+// ============================================
+
+/**
+ * Calculate and update user score after a match is finished
+ * Scoring system:
+ * - Correct result (win/draw/loss): 3 points
+ * - Exact score: 5 additional points (8 total)
+ */
+export async function calculateUserScore(userId: number, matchId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Get match result
+  const match = await getMatchById(matchId);
+  if (!match || !match.isFinished) return;
+
+  // Get user prediction
+  const userPrediction = await getUserPredictionForMatch(userId, matchId);
+  if (!userPrediction) return;
+
+  // Calculate actual result
+  let actualResult: "home" | "draw" | "away";
+  if (match.homeScore! > match.awayScore!) {
+    actualResult = "home";
+  } else if (match.homeScore! < match.awayScore!) {
+    actualResult = "away";
+  } else {
+    actualResult = "draw";
+  }
+
+  // Calculate points
+  let points = 0;
+  let correctResult = false;
+  let correctScore = false;
+
+  // Check if result prediction is correct
+  if (userPrediction.predictedResult === actualResult) {
+    points += 3;
+    correctResult = true;
+  }
+
+  // Check if exact score is correct
+  if (
+    userPrediction.predictedHomeScore === match.homeScore &&
+    userPrediction.predictedAwayScore === match.awayScore
+  ) {
+    points += 5; // Bonus points for exact score
+    correctScore = true;
+  }
+
+  // Update or create user score
+  const existingScore = await db.select().from(userScores).where(eq(userScores.userId, userId)).limit(1);
+
+  if (existingScore.length > 0) {
+    const current = existingScore[0];
+    await db.update(userScores)
+      .set({
+        totalPoints: current.totalPoints + points,
+        correctResults: current.correctResults + (correctResult ? 1 : 0),
+        correctScores: current.correctScores + (correctScore ? 1 : 0),
+        totalPredictions: current.totalPredictions + 1,
+      })
+      .where(eq(userScores.userId, userId));
+  } else {
+    await db.insert(userScores).values({
+      userId,
+      totalPoints: points,
+      correctResults: correctResult ? 1 : 0,
+      correctScores: correctScore ? 1 : 0,
+      totalPredictions: 1,
+    });
+  }
+}
+
+/**
+ * Recalculate all scores for a finished match
+ */
+export async function recalculateMatchScores(matchId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Get all predictions for this match
+  const allPredictions = await getPredictionsByMatchId(matchId);
+
+  // Calculate score for each user
+  for (const prediction of allPredictions) {
+    await calculateUserScore(prediction.userId, matchId);
+  }
+}
+
+/**
+ * Get leaderboard (top users by points)
+ */
+export async function getLeaderboard(limit: number = 100): Promise<UserScore[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(userScores)
+    .orderBy(desc(userScores.totalPoints))
+    .limit(limit);
+}
+
+/**
+ * Get user score by user ID
+ */
+export async function getUserScore(userId: number): Promise<UserScore | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(userScores).where(eq(userScores.userId, userId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
 }

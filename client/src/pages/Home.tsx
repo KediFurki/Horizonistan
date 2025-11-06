@@ -329,6 +329,12 @@ export default function Home() {
                             />
                             <span className="font-semibold text-center">{match.homeTeam}</span>
                             <FormDisplay form={match.homeTeamForm} />
+                            {/* Home Score Prediction */}
+                            {userPrediction && (
+                              <div className="mt-2 px-3 py-1 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+                                <span className="text-lg font-bold text-purple-600">{userPrediction.predictedHomeScore}</span>
+                              </div>
+                            )}
                           </div>
 
                           {/* VS */}
@@ -345,6 +351,12 @@ export default function Home() {
                             />
                             <span className="font-semibold text-center">{match.awayTeam}</span>
                             <FormDisplay form={match.awayTeamForm} />
+                            {/* Away Score Prediction */}
+                            {userPrediction && (
+                              <div className="mt-2 px-3 py-1 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+                                <span className="text-lg font-bold text-purple-600">{userPrediction.predictedAwayScore}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -376,18 +388,15 @@ export default function Home() {
                           </div>
                         )}
 
-                        {/* User Prediction */}
+                        {/* User Prediction - Result Only */}
                         {userPrediction && (
                           <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-800 mb-3">
-                            <div className="flex items-center gap-2 text-sm">
+                            <div className="flex items-center justify-center gap-2 text-sm">
                               <TrendingUp className="h-4 w-4 text-purple-600" />
                               <span className="font-medium">Tahmininiz:</span>
                               <span className="font-bold text-purple-600">
-                                {userPrediction.predictedHomeScore} - {userPrediction.predictedAwayScore}
-                              </span>
-                              <span className="text-muted-foreground">
-                                ({userPrediction.predictedResult === "home" ? "Ev Sahibi Kazanır" : 
-                                  userPrediction.predictedResult === "draw" ? "Beraberlik" : "Deplasman Kazanır"})
+                                {userPrediction.predictedResult === "home" ? match.homeTeam + " Kazanır" : 
+                                  userPrediction.predictedResult === "draw" ? "Beraberlik" : match.awayTeam + " Kazanır"}
                               </span>
                             </div>
                           </div>

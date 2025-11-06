@@ -12,6 +12,7 @@ export default function AdminPredictions() {
   const { user, loading, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const [selectedMatch, setSelectedMatch] = useState<number | "all">("all");
+  const [selectedUser, setSelectedUser] = useState<number | "all">("all");
 
   const { data: allPredictions, isLoading: predictionsLoading } = trpc.admin.predictions.all.useQuery(undefined, {
     enabled: isAuthenticated && user?.role === "admin",
@@ -23,9 +24,17 @@ export default function AdminPredictions() {
     return matches?.find(m => m.id === matchId);
   };
 
-  const filteredPredictions = selectedMatch === "all" 
-    ? allPredictions 
-    : allPredictions?.filter((p: any) => p.matchId === selectedMatch);
+  // Get unique users
+  const uniqueUsers = allPredictions ? 
+    Array.from(new Set(allPredictions.map((p: any) => JSON.stringify({ id: p.userId, name: p.username }))))
+      .map(str => JSON.parse(str)) : [];
+
+  // Filter by match and user
+  const filteredPredictions = allPredictions?.filter((p: any) => {
+    const matchFilter = selectedMatch === "all" || p.matchId === selectedMatch;
+    const userFilter = selectedUser === "all" || p.userId === selectedUser;
+    return matchFilter && userFilter;
+  });
 
   if (loading) {
     return (
@@ -79,28 +88,54 @@ export default function AdminPredictions() {
 
       {/* Content */}
       <div className="container mx-auto py-8">
-        {/* Match Filter */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Maç Filtrele</CardTitle>
-            <CardDescription>Belirli bir maçın tahminlerini görmek için seçin</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Select value={selectedMatch.toString()} onValueChange={(value) => setSelectedMatch(value === "all" ? "all" : parseInt(value))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Maç seçin" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tüm Maçlar</SelectItem>
-                {matches?.map((match) => (
-                  <SelectItem key={match.id} value={match.id.toString()}>
-                    {match.homeTeam} vs {match.awayTeam} - Hafta {match.week}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
+        {/* Filters */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* Match Filter */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Maç Filtrele</CardTitle>
+              <CardDescription>Belirli bir maçın tahminlerini gör</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Select value={selectedMatch.toString()} onValueChange={(value) => setSelectedMatch(value === "all" ? "all" : parseInt(value))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Maç seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tüm Maçlar</SelectItem>
+                  {matches?.map((match) => (
+                    <SelectItem key={match.id} value={match.id.toString()}>
+                      {match.homeTeam} vs {match.awayTeam} - Hafta {match.week}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+
+          {/* User Filter */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Kullanıcı Filtrele</CardTitle>
+              <CardDescription>Belirli bir kullanıcının tahminlerini gör</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Select value={selectedUser.toString()} onValueChange={(value) => setSelectedUser(value === "all" ? "all" : parseInt(value))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Kullanıcı seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tüm Kullanıcılar</SelectItem>
+                  {uniqueUsers.map((u: any) => (
+                    <SelectItem key={u.id} value={u.id.toString()}>
+                      {u.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Predictions List */}
         {predictionsLoading ? (

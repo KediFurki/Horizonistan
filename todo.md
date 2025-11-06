@@ -142,3 +142,14 @@
 
 ### Liderlik Tablosu
 - [x] Açıklama metnini güncelleme (1 puan sonuç, 3 puan skor)
+
+## Kullanıcı Deneyimi İyileştirmeleri (v3.2)
+
+### Admin Tahmin Detayları
+- [x] Kullanıcıya göre filtreleme ekleme
+- [x] Kullanıcı seçildiğinde sadece o kullanıcının tahminlerini gösterme
+
+### Ana Sayfa Layout
+- [x] Skor tahminlerini takım logolarının yanına taşıma
+- [x] "Tahmininiz" bölümünde sadece sonuç tahmini gösterme
+- [x] Daha temiz ve anlaşılır layout

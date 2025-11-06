@@ -11,6 +11,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Loader2, LogOut, Trophy, Calendar, Clock, TrendingUp, MessageSquare, BarChart3, AlertCircle, CheckCircle, XCircle, User } from "lucide-react";
 import { getTeamLogo } from "@/lib/teamLogos";
+import { WeeklyWinner } from "@/components/WeeklyWinner";
 
 // Form display component for team stats
 function FormDisplay({ form }: { form: string | null }) {
@@ -269,6 +270,11 @@ export default function Home() {
 
       {/* Main Content - Two Column Layout */}
       <div className="container mx-auto py-8">
+        {/* Weekly Winner */}
+        <div className="mb-8">
+          <WeeklyWinner />
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Predictions (2/3 width) */}
           <div className="lg:col-span-2 space-y-6">

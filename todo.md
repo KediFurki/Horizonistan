@@ -198,3 +198,11 @@
 
 - [x] Kullanıcı profil sayfasına hafta filtresi ekleme
 - [x] Puan tablosunu sıfırlama
+
+## Haftanın Yıldızı Özelliği (v3.7)
+
+- [x] Backend: Haftalık en yüksek puanı alan kullanıcıyı bulma endpoint'i
+- [x] Frontend: Ana sayfada "Haftanın Yıldızı" bölümü oluşturma
+- [x] Kullanıcı profil fotoğrafı, adı ve haftalık puanını gösterme
+- [x] Hafta seçme özelliği ile geçmiş haftaların yıldızlarını görme
+- [x] Görsel tasarım (kupa ikonu, altın renk vurgusu)

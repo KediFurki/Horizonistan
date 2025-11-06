@@ -384,6 +384,11 @@ export const appRouter = router({
 
   // Leaderboard
   leaderboard: router({
+    weeklyWinner: publicProcedure
+      .input(z.object({ week: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getWeeklyWinner(input.week);
+      }),
     list: publicProcedure.query(async () => {
       const scores = await db.getLeaderboard(100);
       

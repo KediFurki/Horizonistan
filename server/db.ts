@@ -1,4 +1,4 @@
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, matches, Match, InsertMatch, teamStats, TeamStat, InsertTeamStat, predictions, Prediction, InsertPrediction, comments, Comment, InsertComment, userScores, UserScore, InsertUserScore } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -703,4 +703,84 @@ export async function getPredictionsByMatchIdWithUsernames(matchId: number) {
   );
 
   return predictionsWithUsernames;
+}
+
+export async function getWeeklyWinner(week: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  // Get all predictions for matches in this week
+  const weekMatches = await db
+    .select()
+    .from(matches)
+    .where(eq(matches.week, week));
+
+  if (weekMatches.length === 0) return null;
+
+  const matchIds = weekMatches.map(m => m.id);
+
+  // Get all predictions for these matches
+  const weekPredictions = await db
+    .select({
+      userId: predictions.userId,
+      matchId: predictions.matchId,
+      predictedHomeScore: predictions.predictedHomeScore,
+      predictedAwayScore: predictions.predictedAwayScore,
+      predictedResult: predictions.predictedResult,
+    })
+    .from(predictions)
+    .where(inArray(predictions.matchId, matchIds));
+
+  // Calculate points for each user
+  const userPoints: Record<number, number> = {};
+
+  for (const prediction of weekPredictions) {
+    const match = weekMatches.find(m => m.id === prediction.matchId);
+    if (!match || !match.isFinished) continue;
+
+    // Calculate points inline
+    const actualResult = 
+      match.homeScore! > match.awayScore! ? "home" :
+      match.homeScore! < match.awayScore! ? "away" : "draw";
+    
+    let points = 0;
+    
+    // Exact score: 3 points
+    if (prediction.predictedHomeScore === match.homeScore && 
+        prediction.predictedAwayScore === match.awayScore) {
+      points = 3;
+    }
+    // Correct result only: 1 point
+    else if (prediction.predictedResult === actualResult) {
+      points = 1;
+    }
+    
+    userPoints[prediction.userId] = (userPoints[prediction.userId] || 0) + points;
+  }
+
+  // Find the user with the highest points
+  const winnerUserId = Object.keys(userPoints).reduce((a, b) => 
+    userPoints[parseInt(a)] > userPoints[parseInt(b)] ? a : b
+  , "0");
+
+  if (winnerUserId === "0" || !userPoints[parseInt(winnerUserId)]) return null;
+
+  // Get user details
+  const winner = await db
+    .select({
+      id: users.id,
+      username: users.username,
+      profilePhoto: users.profilePhoto,
+    })
+    .from(users)
+    .where(eq(users.id, parseInt(winnerUserId)))
+    .limit(1);
+
+  if (winner.length === 0) return null;
+
+  return {
+    ...winner[0],
+    weeklyPoints: userPoints[parseInt(winnerUserId)],
+    week,
+  };
 }

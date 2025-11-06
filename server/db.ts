@@ -309,6 +309,21 @@ export async function createPrediction(prediction: InsertPrediction) {
   }
 }
 
+export async function updatePrediction(id: number, prediction: Partial<InsertPrediction>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.update(predictions)
+    .set({
+      ...prediction,
+      updatedAt: new Date(),
+    })
+    .where(eq(predictions.id, id));
+
+  const updated = await db.select().from(predictions).where(eq(predictions.id, id)).limit(1);
+  return updated[0];
+}
+
 export async function getPredictionsByUserId(userId: number) {
   const db = await getDb();
   if (!db) return [];
@@ -488,19 +503,19 @@ export async function calculateUserScore(userId: number, matchId: number): Promi
   let correctResult = false;
   let correctScore = false;
 
-  // Check if result prediction is correct
-  if (userPrediction.predictedResult === actualResult) {
-    points += 3;
-    correctResult = true;
-  }
-
-  // Check if exact score is correct
+  // Check if exact score is correct (3 points total)
   if (
     userPrediction.predictedHomeScore === match.homeScore &&
     userPrediction.predictedAwayScore === match.awayScore
   ) {
-    points += 5; // Bonus points for exact score
+    points = 3; // Exact score: 3 points
     correctScore = true;
+    correctResult = true; // Exact score implies correct result
+  }
+  // Check if result prediction is correct (1 point)
+  else if (userPrediction.predictedResult === actualResult) {
+    points = 1; // Correct result only: 1 point
+    correctResult = true;
   }
 
   // Update or create user score
@@ -592,4 +607,76 @@ export async function getUserScore(userId: number): Promise<UserScore> {
     createdAt: new Date(),
     updatedAt: new Date(),
   };
+}
+
+// ============================================
+// ADMIN - USER MANAGEMENT
+// ============================================
+
+export async function getAllUsers() {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(users).orderBy(desc(users.createdAt));
+}
+
+export async function deleteUser(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Delete user's predictions first
+  await db.delete(predictions).where(eq(predictions.userId, userId));
+  
+  // Delete user's comments
+  await db.delete(comments).where(eq(comments.userId, userId));
+  
+  // Delete user's scores
+  await db.delete(userScores).where(eq(userScores.userId, userId));
+  
+  // Finally delete the user
+  await db.delete(users).where(eq(users.id, userId));
+}
+
+// ============================================
+// ADMIN - PREDICTION MANAGEMENT
+// ============================================
+
+export async function getAllPredictionsWithUsernames() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const allPredictions = await db.select().from(predictions).orderBy(desc(predictions.createdAt));
+  
+  const predictionsWithUsernames = await Promise.all(
+    allPredictions.map(async (prediction) => {
+      const user = await getUserById(prediction.userId);
+      const match = await getMatchById(prediction.matchId);
+      return {
+        ...prediction,
+        username: user?.username || user?.name || `User #${prediction.userId}`,
+        matchInfo: match ? `${match.homeTeam} vs ${match.awayTeam}` : "Unknown Match",
+      };
+    })
+  );
+
+  return predictionsWithUsernames;
+}
+
+export async function getPredictionsByMatchIdWithUsernames(matchId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const matchPredictions = await db.select().from(predictions).where(eq(predictions.matchId, matchId));
+  
+  const predictionsWithUsernames = await Promise.all(
+    matchPredictions.map(async (prediction) => {
+      const user = await getUserById(prediction.userId);
+      return {
+        ...prediction,
+        username: user?.username || user?.name || `User #${prediction.userId}`,
+      };
+    })
+  );
+
+  return predictionsWithUsernames;
 }

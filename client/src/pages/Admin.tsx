@@ -203,6 +203,7 @@ export default function Admin() {
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setLocation("/")}>Ana Sayfa</Button>
             <Button variant="outline" onClick={() => setLocation("/admin/predictions")}>Tüm Tahminler</Button>
+            <Button variant="outline" onClick={() => setLocation("/admin/users")}>Kullanıcı Yönetimi</Button>
             <Button variant="outline" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
               Çıkış

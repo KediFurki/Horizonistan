@@ -246,6 +246,21 @@ export const appRouter = router({
         });
       }),
 
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        predictedHomeScore: z.number().min(0),
+        predictedAwayScore: z.number().min(0),
+        predictedResult: z.enum(['home', 'draw', 'away']),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return await db.updatePrediction(input.id, {
+          predictedHomeScore: input.predictedHomeScore,
+          predictedAwayScore: input.predictedAwayScore,
+          predictedResult: input.predictedResult,
+        });
+      }),
+
     myPredictions: protectedProcedure.query(async ({ ctx }) => {
       return await db.getPredictionsByUserId(ctx.user.id);
     }),
@@ -310,6 +325,33 @@ export const appRouter = router({
         await db.deleteComment(input.commentId);
         return { success: true };
       }),
+  }),
+
+  // Admin
+  admin: router({    users: router({
+      list: adminProcedure.query(async () => {
+        return await db.getAllUsers();
+      }),
+
+      delete: adminProcedure
+        .input(z.object({ userId: z.number() }))
+        .mutation(async ({ input }) => {
+          await db.deleteUser(input.userId);
+          return { success: true };
+        }),
+    }),
+
+    predictions: router({
+      all: adminProcedure.query(async () => {
+        return await db.getAllPredictionsWithUsernames();
+      }),
+
+      byMatch: adminProcedure
+        .input(z.object({ matchId: z.number() }))
+        .query(async ({ input }) => {
+          return await db.getPredictionsByMatchIdWithUsernames(input.matchId);
+        }),
+    }),
   }),
 
   // Leaderboard

@@ -9,6 +9,7 @@ import MatchDetail from "./pages/MatchDetail";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Admin from "./pages/Admin";
+import AdminUsers from "./pages/AdminUsers";
 import AdminPredictions from "./pages/AdminPredictions";
 import Leaderboard from "./pages/Leaderboard";
 
@@ -20,7 +21,8 @@ function Router() {
       <Route path={"/leaderboard"} component={Leaderboard} />
       <Route path={"/login"} component={Login} />
       <Route path={"/register"} component={Register} />
-      <Route path={"/admin"} component={Admin} />
+      <Route path={"admin"} component={Admin} />
+      <Route path={"admin/users"} component={AdminUsers} />
       <Route path={"/admin/predictions"} component={AdminPredictions} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}

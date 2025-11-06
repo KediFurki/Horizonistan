@@ -99,3 +99,28 @@
 - [x] Maç bittiğinde resmi skorları kaydetme
 - [x] Ana sayfada resmi skorları gösterme (kullanıcı tahmininin üstünde)
 - [x] Resmi skor girildikten sonra puanları otomatik hesaplama
+
+## Yeni Özellikler ve Değişiklikler (v3.0)
+
+### Puan Sistemi Güncelleme
+- [x] Puan sistemini değiştirme: Sadece sonuç 1 puan, Tam skor 3 puan
+- [x] calculateUserPoints fonksiyonunu güncelleme
+- [ ] Mevcut puanları yeniden hesaplama (admin resmi skor girdiğinde otomatik)
+
+### Ana Sayfa Layout Değişikliği
+- [x] Ana sayfayı iki sütunlu yapma (Sol: Tahmin tablosu, Sağ: Resmi sonuçlar)
+- [x] Resmi sonuçlar tablosu oluşturma (sadece bitmiş maçlar)
+- [x] Her maç için "Doğru Tahmin" / "Tahmin Tutmadı" göstergesi ekleme
+- [x] Kullanıcı tahminlerini sol tarafta gösterme
+
+### Admin Kullanıcı Yönetimi
+- [x] Admin paneline kullanıcı listesi sayfası ekleme
+- [x] Tüm kayıtlı kullanıcıları listeleme
+- [x] Kullanıcı silme fonksiyonu ekleme
+- [x] Kullanıcı bilgilerini görüntüleme (kullanıcı adı, kayıt tarihi, toplam tahmin)
+
+### Admin Tahmin Detayları
+- [x] Admin paneline tahmin detayları sayfası ekleme
+- [x] Hangi kullanıcının hangi maçta ne tahmin ettiğini gösterme
+- [x] Görsel tahmin kartları (kullanıcı adı, skor, sonuç seçimi)
+- [x] Maça göre filtreleme özelliği

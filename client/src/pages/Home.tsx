@@ -51,6 +51,7 @@ export default function Home() {
   const { user, loading, isAuthenticated, logout } = useAuth();
   const [, setLocation] = useLocation();
   const [selectedWeek, setSelectedWeek] = useState<number>(11);
+  const [resultsWeek, setResultsWeek] = useState<number | "all">("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
   const [homeScore, setHomeScore] = useState("");
@@ -150,10 +151,10 @@ export default function Home() {
   // Get finished matches for results table
   const finishedMatches = useMemo(() => {
     if (!matches) return [];
-    return matches.filter((m) => m.isFinished).sort((a, b) => 
-      new Date(b.matchDate).getTime() - new Date(a.matchDate).getTime()
-    );
-  }, [matches]);
+    return matches
+      .filter((m) => m.isFinished && (resultsWeek === "all" || m.week === resultsWeek))
+      .sort((a, b) => new Date(b.matchDate).getTime() - new Date(a.matchDate).getTime());
+  }, [matches, resultsWeek]);
 
   // Get available weeks
   const availableWeeks = useMemo(() => {
@@ -461,9 +462,23 @@ export default function Home() {
                 <CardTitle className="flex items-center gap-2">
                   ⚽ Resmi Sonuçlar
                 </CardTitle>
-                <CardDescription className="text-green-100">
+                <CardDescription className="text-green-100 mb-3">
                   Tamamlanan maçlar
                 </CardDescription>
+                {/* Week Filter for Results */}
+                <Select value={resultsWeek.toString()} onValueChange={(value) => setResultsWeek(value === "all" ? "all" : parseInt(value))}>
+                  <SelectTrigger className="bg-white text-gray-900">
+                    <SelectValue placeholder="Hafta seçin" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tüm Haftalar</SelectItem>
+                    {availableWeeks.map((week) => (
+                      <SelectItem key={week} value={week.toString()}>
+                        Hafta {week}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </CardHeader>
               <CardContent className="p-4 max-h-[calc(100vh-200px)] overflow-y-auto">
                 {finishedMatches.length > 0 ? (

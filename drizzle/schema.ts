@@ -11,11 +11,9 @@ export const users = mysqlTable("users", {
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
-  
-  // Local authentication fields
-  username: varchar("username", { length: 50 }).unique(),
-  passwordHash: varchar("passwordHash", { length: 255 }),
-  
+  username: varchar("username", { length: 64 }).unique(),
+  passwordHash: text("passwordHash"),
+  profilePhoto: text("profilePhoto"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),

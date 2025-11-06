@@ -169,3 +169,25 @@
 ### Ana Sayfa Skor Düzeltmesi
 - [x] Skorları logo altından logo yanına taşıma
 - [x] Skorlar takım adının yanında ortada gösterilmeli
+
+## Yeni Güncellemeler (v3.4)
+
+### Ana Sayfa İyileştirmeleri
+- [x] Resmi sonuçlar tablosuna hafta filtresi ekleme
+- [x] Hafta seçildiğinde sadece o haftanın resmi sonuçlarını gösterme
+
+### Admin Güncelleme
+- [x] Admin kullanıcı adını "admin" olarak güncelleme
+- [x] Admin şifresini "123kedi456" olarak güncelleme
+- [x] Eski admin kullanıcısını silme
+
+### Profil Fotoğrafı Sistemi
+- [x] Kullanıcı tablosuna profilePhoto alanı ekleme
+- [x] Backend profil fotoğrafı yükleme endpoint'i
+- [ ] Frontend profil fotoğrafı yükleme arayüzü (sonraki güncelleme)
+- [ ] Profil fotoğrafını liderlik tablosunda gösterme (sonraki güncelleme)
+- [ ] Profil fotoğrafını kullanıcı profil sayfasında gösterme (sonraki güncelleme)
+- [ ] Profil fotoğrafını yorumlarda gösterme (sonraki güncelleme)
+
+### GitHub
+- [ ] Tüm güncellemeleri GitHub'a push etme

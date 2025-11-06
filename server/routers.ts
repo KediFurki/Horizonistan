@@ -6,6 +6,9 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import * as db from "./db";
 import { sdk } from "./_core/sdk";
+import { getDb } from "./db";
+import { users } from "../drizzle/schema";
+import { eq } from "drizzle-orm";
 
 // Admin-only procedure
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -26,6 +29,19 @@ export const appRouter = router({
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
     }),
+
+    uploadProfilePhoto: protectedProcedure
+      .input(z.object({ photoUrl: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+        
+        await db.update(users)
+          .set({ profilePhoto: input.photoUrl })
+          .where(eq(users.id, ctx.user.id));
+        
+        return { success: true };
+      }),
 
     // Local registration
     register: publicProcedure

@@ -12,6 +12,7 @@ import Admin from "./pages/Admin";
 import AdminUsers from "./pages/AdminUsers";
 import AdminPredictions from "./pages/AdminPredictions";
 import Leaderboard from "./pages/Leaderboard";
+import UserProfile from "./pages/UserProfile";
 
 function Router() {
   return (
@@ -19,6 +20,7 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path="/match/:id" component={MatchDetail} />
       <Route path={"/leaderboard"} component={Leaderboard} />
+      <Route path={"/user/:userId"} component={UserProfile} />
       <Route path={"/login"} component={Login} />
       <Route path={"/register"} component={Register} />
       <Route path={"admin"} component={Admin} />

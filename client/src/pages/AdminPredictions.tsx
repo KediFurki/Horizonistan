@@ -13,6 +13,7 @@ export default function AdminPredictions() {
   const [, setLocation] = useLocation();
   const [selectedMatch, setSelectedMatch] = useState<number | "all">("all");
   const [selectedUser, setSelectedUser] = useState<number | "all">("all");
+  const [selectedWeek, setSelectedWeek] = useState<number | "all">("all");
 
   const { data: allPredictions, isLoading: predictionsLoading } = trpc.admin.predictions.all.useQuery(undefined, {
     enabled: isAuthenticated && user?.role === "admin",
@@ -29,11 +30,17 @@ export default function AdminPredictions() {
     Array.from(new Set(allPredictions.map((p: any) => JSON.stringify({ id: p.userId, name: p.username }))))
       .map(str => JSON.parse(str)) : [];
 
-  // Filter by match and user
+  // Get unique weeks
+  const uniqueWeeks = matches ? 
+    Array.from(new Set(matches.map((m: any) => m.week))).sort((a, b) => a - b) : [];
+
+  // Filter by match, user and week
   const filteredPredictions = allPredictions?.filter((p: any) => {
+    const match = getMatchInfo(p.matchId);
     const matchFilter = selectedMatch === "all" || p.matchId === selectedMatch;
     const userFilter = selectedUser === "all" || p.userId === selectedUser;
-    return matchFilter && userFilter;
+    const weekFilter = selectedWeek === "all" || (match && match.week === selectedWeek);
+    return matchFilter && userFilter && weekFilter;
   });
 
   if (loading) {
@@ -89,7 +96,7 @@ export default function AdminPredictions() {
       {/* Content */}
       <div className="container mx-auto py-8">
         {/* Filters */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           {/* Match Filter */}
           <Card>
             <CardHeader>
@@ -129,6 +136,29 @@ export default function AdminPredictions() {
                   {uniqueUsers.map((u: any) => (
                     <SelectItem key={u.id} value={u.id.toString()}>
                       {u.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+
+          {/* Week Filter */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Hafta Filtrele</CardTitle>
+              <CardDescription>Belirli bir haftanın tahminlerini gör</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Select value={selectedWeek.toString()} onValueChange={(value) => setSelectedWeek(value === "all" ? "all" : parseInt(value))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Hafta seçin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tüm Haftalar</SelectItem>
+                  {uniqueWeeks.map((week: number) => (
+                    <SelectItem key={week} value={week.toString()}>
+                      Hafta {week}
                     </SelectItem>
                   ))}
                 </SelectContent>

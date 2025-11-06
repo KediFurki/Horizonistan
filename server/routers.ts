@@ -265,6 +265,18 @@ export const appRouter = router({
       return await db.getPredictionsByUserId(ctx.user.id);
     }),
 
+    byUser: publicProcedure
+      .input(z.object({ userId: z.number() }))
+      .query(async ({ input }) => {
+        const predictions = await db.getPredictionsByUserId(input.userId);
+        // Get username for each prediction
+        const user = await db.getUserById(input.userId);
+        return predictions.map(p => ({
+          ...p,
+          username: user?.username || user?.name || `User #${input.userId}`,
+        }));
+      }),
+
     forMatch: protectedProcedure
       .input(z.object({ matchId: z.number() }))
       .query(async ({ input, ctx }) => {
@@ -376,6 +388,12 @@ export const appRouter = router({
     myScore: protectedProcedure.query(async ({ ctx }) => {
       return await db.getUserScore(ctx.user.id);
     }),
+
+    userScore: publicProcedure
+      .input(z.object({ userId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getUserScore(input.userId);
+      }),
   }),
 });
 

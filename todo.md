@@ -153,3 +153,19 @@
 - [x] Skor tahminlerini takım logolarının yanına taşıma
 - [x] "Tahmininiz" bölümünde sadece sonuç tahmini gösterme
 - [x] Daha temiz ve anlaşılır layout
+
+## Son İyileştirmeler (v3.3)
+
+### Admin Paneli
+- [x] Tahmin detaylarına hafta filtresi ekleme
+- [x] Maç, kullanıcı ve hafta filtreleri birlikte çalışma
+
+### Kullanıcı Profil Sayfası
+- [x] Liderlik tablosunda kullanıcı adlarını tıklanabilir yapma
+- [x] Kullanıcı profil sayfası oluşturma
+- [x] Kullanıcının tahmin geçmişini gösterme
+- [x] Kullanıcı istatistikleri (toplam tahmin, doğru tahmin, puan)
+
+### Ana Sayfa Skor Düzeltmesi
+- [x] Skorları logo altından logo yanına taşıma
+- [x] Skorlar takım adının yanında ortada gösterilmeli

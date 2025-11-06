@@ -329,17 +329,25 @@ export default function Home() {
                             />
                             <span className="font-semibold text-center">{match.homeTeam}</span>
                             <FormDisplay form={match.homeTeamForm} />
-                            {/* Home Score Prediction */}
-                            {userPrediction && (
-                              <div className="mt-2 px-3 py-1 bg-purple-100 dark:bg-purple-900/30 rounded-full">
-                                <span className="text-lg font-bold text-purple-600">{userPrediction.predictedHomeScore}</span>
-                              </div>
-                            )}
                           </div>
 
-                          {/* VS */}
-                          <div className="px-6 text-2xl font-bold text-muted-foreground">
-                            vs
+                          {/* Score and VS */}
+                          <div className="flex items-center gap-4">
+                            {/* Home Score Prediction */}
+                            {userPrediction && (
+                              <div className="px-4 py-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                                <span className="text-2xl font-bold text-purple-600">{userPrediction.predictedHomeScore}</span>
+                              </div>
+                            )}
+                            
+                            <div className="text-2xl font-bold text-muted-foreground">-</div>
+                            
+                            {/* Away Score Prediction */}
+                            {userPrediction && (
+                              <div className="px-4 py-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                                <span className="text-2xl font-bold text-purple-600">{userPrediction.predictedAwayScore}</span>
+                              </div>
+                            )}
                           </div>
 
                           {/* Away Team */}
@@ -351,12 +359,6 @@ export default function Home() {
                             />
                             <span className="font-semibold text-center">{match.awayTeam}</span>
                             <FormDisplay form={match.awayTeamForm} />
-                            {/* Away Score Prediction */}
-                            {userPrediction && (
-                              <div className="mt-2 px-3 py-1 bg-purple-100 dark:bg-purple-900/30 rounded-full">
-                                <span className="text-lg font-bold text-purple-600">{userPrediction.predictedAwayScore}</span>
-                              </div>
-                            )}
                           </div>
                         </div>
 

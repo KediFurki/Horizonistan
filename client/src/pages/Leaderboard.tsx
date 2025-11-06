@@ -1,5 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -129,7 +129,11 @@ export default function Leaderboard() {
                           </div>
                         </TableCell>
                         <TableCell className="font-medium">
-                          {entry.username}
+                          <Link href={`/user/${entry.userId}`}>
+                            <span className="text-purple-600 dark:text-purple-400 hover:underline cursor-pointer">
+                              {entry.username}
+                            </span>
+                          </Link>
                           {isCurrentUser && (
                             <Badge variant="outline" className="ml-2">Sen</Badge>
                           )}

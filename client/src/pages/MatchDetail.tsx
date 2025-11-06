@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Loader2, ArrowLeft, MessageSquare, BarChart3, Send, Trash2 } from "lucide-react";
+import { Avatar } from "@/components/Avatar";
 import { getTeamLogo } from "@/lib/teamLogos";
 import { Progress } from "@/components/ui/progress";
 
@@ -240,11 +241,14 @@ export default function MatchDetail() {
                   <Card key={comment.id}>
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <span className="font-semibold">{comment.username}</span>
-                          <span className="text-sm text-muted-foreground ml-2">
-                            {new Date(comment.createdAt).toLocaleString("tr-TR")}
-                          </span>
+                        <div className="flex items-center gap-3">
+                          <Avatar src={comment.profilePhoto} alt={comment.username} size="sm" />
+                          <div>
+                            <div className="font-semibold">{comment.username}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {new Date(comment.createdAt).toLocaleString("tr-TR")}
+                            </div>
+                          </div>
                         </div>
                         {(user?.id === comment.userId || user?.role === "admin") && (
                           <Button

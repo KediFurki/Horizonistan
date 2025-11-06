@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { Loader2, ArrowLeft, User, Trophy, TrendingUp, CheckCircle, XCircle } from "lucide-react";
+import { Avatar } from "@/components/Avatar";
 import { getTeamLogo } from "@/lib/teamLogos";
 
 export default function UserProfile() {
@@ -82,7 +83,7 @@ export default function UserProfile() {
               </Button>
               <div>
                 <h1 className="text-3xl font-bold flex items-center gap-3">
-                  <User className="h-8 w-8" />
+                  <Avatar src={userPredictions?.[0]?.profilePhoto} alt={username} size="lg" />
                   {username}
                 </h1>
                 <p className="text-purple-100">Kullanıcı Profili ve Tahmin Geçmişi</p>

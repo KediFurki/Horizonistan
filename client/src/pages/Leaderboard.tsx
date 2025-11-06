@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
 import { Loader2, ArrowLeft, Trophy, Medal, Award } from "lucide-react";
+import { Avatar } from "@/components/Avatar";
 
 export default function Leaderboard() {
   const [, setLocation] = useLocation();
@@ -130,9 +131,10 @@ export default function Leaderboard() {
                         </TableCell>
                         <TableCell className="font-medium">
                           <Link href={`/user/${entry.userId}`}>
-                            <span className="text-purple-600 dark:text-purple-400 hover:underline cursor-pointer">
-                              {entry.username}
-                            </span>
+                            <div className="flex items-center gap-3 text-purple-600 dark:text-purple-400 hover:underline cursor-pointer">
+                              <Avatar src={entry.profilePhoto} alt={entry.username} size="sm" />
+                              <span>{entry.username}</span>
+                            </div>
                           </Link>
                           {isCurrentUser && (
                             <Badge variant="outline" className="ml-2">Sen</Badge>

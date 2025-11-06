@@ -184,10 +184,12 @@
 ### Profil Fotoğrafı Sistemi
 - [x] Kullanıcı tablosuna profilePhoto alanı ekleme
 - [x] Backend profil fotoğrafı yükleme endpoint'i
-- [ ] Frontend profil fotoğrafı yükleme arayüzü (sonraki güncelleme)
-- [ ] Profil fotoğrafını liderlik tablosunda gösterme (sonraki güncelleme)
-- [ ] Profil fotoğrafını kullanıcı profil sayfasında gösterme (sonraki güncelleme)
-- [ ] Profil fotoğrafını yorumlarda gösterme (sonraki güncelleme)
+- [x] Frontend profil fotoğrafı yükleme arayüzü (Profil Ayarları sayfası)
+- [x] Avatar component oluşturma
+- [x] S3 fotoğraf yükleme sistemi entegrasyonu
+- [x] Profil fotoğrafını liderlik tablosunda gösterme
+- [x] Profil fotoğrafını kullanıcı profil sayfasında gösterme
+- [x] Profil fotoğrafını yorumlarda gösterme
 
 ### GitHub
-- [ ] Tüm güncellemeleri GitHub'a push etme
+- [x] Tüm güncellemeleri GitHub'a push etme

@@ -328,7 +328,16 @@ export async function getPredictionsByUserId(userId: number) {
   const db = await getDb();
   if (!db) return [];
 
-  return await db.select().from(predictions).where(eq(predictions.userId, userId));
+  const userPredictions = await db.select().from(predictions).where(eq(predictions.userId, userId));
+  
+  // Get user info
+  const user = await getUserById(userId);
+  
+  return userPredictions.map(p => ({
+    ...p,
+    username: user?.username || user?.name || 'Unknown',
+    profilePhoto: user?.profilePhoto || null,
+  }));
 }
 
 export async function getPredictionsByMatchId(matchId: number) {
@@ -374,7 +383,7 @@ export async function createComment(comment: InsertComment): Promise<Comment> {
   return inserted[0];
 }
 
-export async function getCommentsByMatchId(matchId: number): Promise<(Comment & { username: string })[]> {
+export async function getCommentsByMatchId(matchId: number) {
   const db = await getDb();
   if (!db) return [];
 
@@ -384,18 +393,19 @@ export async function getCommentsByMatchId(matchId: number): Promise<(Comment & 
     .where(eq(comments.matchId, matchId))
     .orderBy(desc(comments.createdAt));
 
-  // Get usernames for each comment
-  const commentsWithUsernames = await Promise.all(
+  // Get usernames and profilePhoto for each comment
+  const commentsWithUserInfo = await Promise.all(
     commentsList.map(async (comment) => {
       const user = await getUserById(comment.userId);
       return {
         ...comment,
         username: user?.username || user?.name || `User #${comment.userId}`,
+        profilePhoto: user?.profilePhoto || null,
       };
     })
   );
 
-  return commentsWithUsernames;
+  return commentsWithUserInfo;
 }
 
 export async function deleteComment(commentId: number): Promise<void> {
@@ -561,15 +571,29 @@ export async function recalculateMatchScores(matchId: number): Promise<void> {
 /**
  * Get leaderboard (top users by points)
  */
-export async function getLeaderboard(limit: number = 100): Promise<UserScore[]> {
+export async function getLeaderboard(limit: number = 100) {
   const db = await getDb();
   if (!db) return [];
 
-  return await db
+  const scores = await db
     .select()
     .from(userScores)
     .orderBy(desc(userScores.totalPoints))
     .limit(limit);
+  
+  // Join with users to get username and profilePhoto
+  const scoresWithUserInfo = await Promise.all(
+    scores.map(async (score) => {
+      const user = await getUserById(score.userId);
+      return {
+        ...score,
+        username: user?.username || user?.name || 'Unknown',
+        profilePhoto: user?.profilePhoto || null,
+      };
+    })
+  );
+  
+  return scoresWithUserInfo;
 }
 
 /**

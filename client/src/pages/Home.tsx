@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Loader2, LogOut, Trophy, Calendar, Clock, TrendingUp, MessageSquare, BarChart3, AlertCircle, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, LogOut, Trophy, Calendar, Clock, TrendingUp, MessageSquare, BarChart3, AlertCircle, CheckCircle, XCircle, User } from "lucide-react";
 import { getTeamLogo } from "@/lib/teamLogos";
 
 // Form display component for team stats
@@ -248,6 +248,10 @@ export default function Home() {
               <Button variant="outline" className="bg-white/10 hover:bg-white/20 border-white/30 text-white" onClick={() => setLocation("/leaderboard")}>
                 <Trophy className="h-4 w-4 mr-2" />
                 Liderlik
+              </Button>
+              <Button variant="outline" className="bg-white/10 hover:bg-white/20 border-white/30 text-white" onClick={() => setLocation("/profile/settings")}>
+                <User className="h-4 w-4 mr-2" />
+                Profil
               </Button>
               {user?.role === "admin" && (
                 <Button variant="outline" className="bg-white/10 hover:bg-white/20 border-white/30 text-white" onClick={() => setLocation("/admin")}>

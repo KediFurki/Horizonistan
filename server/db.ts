@@ -1,6 +1,6 @@
 import { eq, and, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, matches, Match, InsertMatch, teamStats, TeamStat, InsertTeamStat, predictions, Prediction, InsertPrediction } from "../drizzle/schema";
+import { InsertUser, users, matches, Match, InsertMatch, teamStats, TeamStat, InsertTeamStat, predictions, Prediction, InsertPrediction, comments, Comment, InsertComment } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import bcrypt from 'bcryptjs';
 
@@ -203,7 +203,24 @@ export async function getAllMatches() {
   const db = await getDb();
   if (!db) return [];
 
-  return await db.select().from(matches).orderBy(desc(matches.matchDate));
+  const allMatches = await db.select().from(matches).orderBy(desc(matches.matchDate));
+  
+  // Fetch team stats for each match
+  const matchesWithStats = await Promise.all(
+    allMatches.map(async (match) => {
+      const stats = await getTeamStatsByMatchId(match.id);
+      const homeStats = stats.find(s => s.teamName === match.homeTeam);
+      const awayStats = stats.find(s => s.teamName === match.awayTeam);
+      
+      return {
+        ...match,
+        homeTeamForm: homeStats?.lastFiveForm || null,
+        awayTeamForm: awayStats?.lastFiveForm || null,
+      };
+    })
+  );
+  
+  return matchesWithStats;
 }
 
 export async function getMatchById(id: number) {
@@ -325,4 +342,98 @@ export async function getAllPredictions() {
   if (!db) return [];
 
   return await db.select().from(predictions).orderBy(desc(predictions.createdAt));
+}
+
+// ============================================
+// COMMENTS
+// ============================================
+
+export async function createComment(comment: InsertComment): Promise<Comment> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(comments).values(comment);
+  const insertedId = Number(result[0].insertId);
+  
+  const inserted = await db.select().from(comments).where(eq(comments.id, insertedId)).limit(1);
+  return inserted[0];
+}
+
+export async function getCommentsByMatchId(matchId: number): Promise<Comment[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(comments)
+    .where(eq(comments.matchId, matchId))
+    .orderBy(desc(comments.createdAt));
+}
+
+export async function deleteComment(commentId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.delete(comments).where(eq(comments.id, commentId));
+}
+
+// ============================================
+// PREDICTION STATISTICS
+// ============================================
+
+export async function getPredictionStatsByMatchId(matchId: number): Promise<{
+  total: number;
+  homeWins: number;
+  draws: number;
+  awayWins: number;
+  avgHomeScore: number;
+  avgAwayScore: number;
+}> {
+  const db = await getDb();
+  if (!db) {
+    return { total: 0, homeWins: 0, draws: 0, awayWins: 0, avgHomeScore: 0, avgAwayScore: 0 };
+  }
+
+  const allPredictions = await db
+    .select()
+    .from(predictions)
+    .where(eq(predictions.matchId, matchId));
+
+  const total = allPredictions.length;
+  if (total === 0) {
+    return { total: 0, homeWins: 0, draws: 0, awayWins: 0, avgHomeScore: 0, avgAwayScore: 0 };
+  }
+
+  const homeWins = allPredictions.filter(p => p.predictedResult === "home").length;
+  const draws = allPredictions.filter(p => p.predictedResult === "draw").length;
+  const awayWins = allPredictions.filter(p => p.predictedResult === "away").length;
+
+  const totalHomeScore = allPredictions.reduce((sum, p) => sum + p.predictedHomeScore, 0);
+  const totalAwayScore = allPredictions.reduce((sum, p) => sum + p.predictedAwayScore, 0);
+
+  return {
+    total,
+    homeWins,
+    draws,
+    awayWins,
+    avgHomeScore: Math.round((totalHomeScore / total) * 10) / 10,
+    avgAwayScore: Math.round((totalAwayScore / total) * 10) / 10,
+  };
+}
+
+/**
+ * Check if a match can still accept predictions (30 minutes before match start)
+ */
+export async function canMakePrediction(matchId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+
+  const match = await db.select().from(matches).where(eq(matches.id, matchId)).limit(1);
+  if (match.length === 0) return false;
+
+  const matchDate = new Date(match[0].matchDate);
+  const now = new Date();
+  const thirtyMinutesBeforeMatch = new Date(matchDate.getTime() - 30 * 60 * 1000);
+
+  return now < thirtyMinutesBeforeMatch;
 }

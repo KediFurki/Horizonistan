@@ -88,3 +88,24 @@ export const predictions = mysqlTable("predictions", {
 
 export type Prediction = typeof predictions.$inferSelect;
 export type InsertPrediction = typeof predictions.$inferInsert;
+
+/**
+ * Comments table - stores user comments/discussions for matches
+ */
+export const comments = mysqlTable("comments", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  matchId: int("matchId").notNull(),
+  
+  // Comment content
+  content: text("content").notNull(),
+  
+  // Optional: parent comment for nested replies
+  parentId: int("parentId"),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Comment = typeof comments.$inferSelect;
+export type InsertComment = typeof comments.$inferInsert;

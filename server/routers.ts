@@ -1,9 +1,9 @@
 import { COOKIE_NAME } from "@shared/const";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import * as db from "./db";
 import { sdk } from "./_core/sdk";
 
@@ -83,13 +83,33 @@ export const appRouter = router({
       return await db.getAllMatches();
     }),
 
+    byId: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const match = await db.getMatchById(input.id);
+        if (!match) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Match not found" });
+        }
+        
+        // Get team stats
+        const stats = await db.getTeamStatsByMatchId(input.id);
+        const homeStats = stats.find(s => s.teamName === match.homeTeam);
+        const awayStats = stats.find(s => s.teamName === match.awayTeam);
+        
+        return {
+          ...match,
+          homeTeamForm: homeStats?.lastFiveForm || null,
+          awayTeamForm: awayStats?.lastFiveForm || null,
+        };
+      }),
+
     byWeek: publicProcedure
       .input(z.object({ week: z.number() }))
       .query(async ({ input }) => {
         return await db.getMatchesByWeek(input.week);
       }),
 
-    byId: publicProcedure
+    byIdWithStats: publicProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
         const match = await db.getMatchById(input.id);
@@ -240,6 +260,50 @@ export const appRouter = router({
       .input(z.object({ matchId: z.number() }))
       .query(async ({ input }) => {
         return await db.getPredictionsByMatchId(input.matchId);
+      }),
+
+    stats: publicProcedure
+      .input(z.object({ matchId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getPredictionStatsByMatchId(input.matchId);
+      }),
+
+    canPredict: protectedProcedure
+      .input(z.object({ matchId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.canMakePrediction(input.matchId);
+      }),
+  }),
+
+  // Comments
+  comments: router({
+    list: publicProcedure
+      .input(z.object({ matchId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getCommentsByMatchId(input.matchId);
+      }),
+
+    create: protectedProcedure
+      .input(z.object({
+        matchId: z.number(),
+        content: z.string().min(1).max(1000),
+        parentId: z.number().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return await db.createComment({
+          userId: ctx.user.id,
+          matchId: input.matchId,
+          content: input.content,
+          parentId: input.parentId,
+        });
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ commentId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        // TODO: Add authorization check (user can only delete their own comments, or admin can delete any)
+        await db.deleteComment(input.commentId);
+        return { success: true };
       }),
   }),
 });

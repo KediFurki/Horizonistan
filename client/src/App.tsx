@@ -5,6 +5,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import MatchDetail from "./pages/MatchDetail";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Admin from "./pages/Admin";
@@ -12,9 +13,9 @@ import AdminPredictions from "./pages/AdminPredictions";
 
 function Router() {
   return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/login"} component={Login} />
+    <Switch>      <Route path={"/"} component={Home} />
+      <Route path="/match/:id" component={MatchDetail} />
+      <Route path={"/404"} component={NotFound} />
       <Route path={"/register"} component={Register} />
       <Route path={"/admin"} component={Admin} />
       <Route path={"/admin/predictions"} component={AdminPredictions} />

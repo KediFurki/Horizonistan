@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -6,11 +6,46 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Loader2, LogOut, Trophy, Calendar, Clock, TrendingUp } from "lucide-react";
+import { Loader2, LogOut, Trophy, Calendar, Clock, TrendingUp, MessageSquare, BarChart3, AlertCircle } from "lucide-react";
+import { getTeamLogo } from "@/lib/teamLogos";
+
+// Form display component for team stats
+function FormDisplay({ form }: { form: string | null }) {
+  if (!form) return null;
+  
+  return (
+    <div className="flex gap-1">
+      {form.split("").map((char, idx) => {
+        let bgColor = "bg-gray-400";
+        let label = char;
+        
+        if (char === "G") {
+          bgColor = "bg-green-500";
+          label = "G";
+        } else if (char === "B") {
+          bgColor = "bg-yellow-500";
+          label = "B";
+        } else if (char === "M") {
+          bgColor = "bg-red-500";
+          label = "M";
+        }
+        
+        return (
+          <div
+            key={idx}
+            className={`w-7 h-7 ${bgColor} text-white text-xs font-bold rounded-full flex items-center justify-center shadow-sm`}
+            title={char === "G" ? "Galibiyet" : char === "B" ? "Beraberlik" : "Mağlubiyet"}
+          >
+            {label}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function Home() {
   const { user, loading, isAuthenticated, logout } = useAuth();
@@ -64,7 +99,7 @@ export default function Home() {
   }, [allMatches, selectedWeek]);
 
   // Set default week to first week
-  useMemo(() => {
+  useEffect(() => {
     if (weeks.length > 0 && selectedWeek === null) {
       setSelectedWeek(weeks[0]);
     }
@@ -89,6 +124,16 @@ export default function Home() {
   };
 
   const openPredictionDialog = (match: any) => {
+    // Check if prediction time has passed (30 minutes before match)
+    const matchDate = new Date(match.matchDate);
+    const now = new Date();
+    const thirtyMinutesBeforeMatch = new Date(matchDate.getTime() - 30 * 60 * 1000);
+    
+    if (now >= thirtyMinutesBeforeMatch) {
+      toast.error("Maç başlangıcına 30 dakikadan az kaldı. Tahmin yapılamaz veya güncellenemez.");
+      return;
+    }
+    
     setSelectedMatch(match);
     
     // Check if user already has a prediction for this match
@@ -97,27 +142,22 @@ export default function Home() {
       setPredictedHomeScore(existingPrediction.predictedHomeScore.toString());
       setPredictedAwayScore(existingPrediction.predictedAwayScore.toString());
       setPredictedResult(existingPrediction.predictedResult);
+    } else {
+      resetPredictionForm();
+      setSelectedMatch(match);
     }
     
     setIsPredictionDialogOpen(true);
   };
 
-  const getFormDisplay = (form: string) => {
-    return form.split("").map((char, idx) => {
-      let bgColor = "bg-gray-400";
-      if (char === "G") bgColor = "bg-green-500";
-      else if (char === "B") bgColor = "bg-yellow-500";
-      else if (char === "M") bgColor = "bg-red-500";
-      
-      return (
-        <span
-          key={idx}
-          className={`inline-block w-6 h-6 ${bgColor} text-white text-xs font-bold rounded flex items-center justify-center`}
-        >
-          {char}
-        </span>
-      );
-    });
+  const canMakePrediction = (match: any) => {
+    if (match.isFinished) return false;
+    
+    const matchDate = new Date(match.matchDate);
+    const now = new Date();
+    const thirtyMinutesBeforeMatch = new Date(matchDate.getTime() - 30 * 60 * 1000);
+    
+    return now < thirtyMinutesBeforeMatch;
   };
 
   const handleLogout = async () => {
@@ -139,9 +179,11 @@ export default function Home() {
         <Card className="w-full max-w-md shadow-xl">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
-                <Trophy className="w-12 h-12 text-white" />
-              </div>
+              <img 
+                src="/logos/Ana-sayfa-giriş.png" 
+                alt="Horizonistan Logo" 
+                className="h-32 w-auto object-contain"
+              />
             </div>
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Horizonistan Fikstür Tahmini
@@ -177,9 +219,11 @@ export default function Home() {
         <div className="container py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
-                <Trophy className="w-7 h-7 text-white" />
-              </div>
+              <img 
+                src="/logos/Premier-League-Logo.png" 
+                alt="Premier League" 
+                className="h-12 w-auto object-contain"
+              />
               <div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   Horizonistan Fikstür Tahmini
@@ -229,13 +273,14 @@ export default function Home() {
           <div className="grid gap-4">
             {matches.map((match) => {
               const userPrediction = myPredictions?.find(p => p.matchId === match.id);
+              const canPredict = canMakePrediction(match);
               
               return (
                 <Card key={match.id} className="hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
                           <Calendar className="h-4 w-4" />
                           <span className="font-medium">{match.day}</span>
                           <span>•</span>
@@ -243,30 +288,43 @@ export default function Home() {
                           <span>{new Date(match.matchDate).toLocaleString("tr-TR")}</span>
                         </div>
 
-                        <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center mb-4">
-                          <div className="text-right">
-                            <div className="text-xl font-bold mb-2">{match.homeTeam}</div>
-                            {/* Home team form would be fetched from teamStats */}
+                        <div className="grid grid-cols-[1fr_auto_1fr] gap-6 items-center mb-4">
+                          {/* Home Team */}
+                          <div className="flex flex-col items-end gap-2">
+                            <img 
+                              src={getTeamLogo(match.homeTeam)} 
+                              alt={match.homeTeam}
+                              className="h-16 w-16 object-contain"
+                            />
+                            <div className="text-lg font-bold text-right">{match.homeTeam}</div>
+                            <FormDisplay form={match.homeTeamForm} />
                           </div>
                           
+                          {/* Score/VS */}
                           <div className="text-center px-4">
                             {match.isFinished ? (
-                              <div className="text-2xl font-bold text-purple-600">
+                              <div className="text-3xl font-bold text-purple-600">
                                 {match.homeScore} - {match.awayScore}
                               </div>
                             ) : (
-                              <div className="text-lg font-semibold text-muted-foreground">vs</div>
+                              <div className="text-xl font-semibold text-muted-foreground">vs</div>
                             )}
                           </div>
                           
-                          <div className="text-left">
-                            <div className="text-xl font-bold mb-2">{match.awayTeam}</div>
-                            {/* Away team form would be fetched from teamStats */}
+                          {/* Away Team */}
+                          <div className="flex flex-col items-start gap-2">
+                            <img 
+                              src={getTeamLogo(match.awayTeam)} 
+                              alt={match.awayTeam}
+                              className="h-16 w-16 object-contain"
+                            />
+                            <div className="text-lg font-bold text-left">{match.awayTeam}</div>
+                            <FormDisplay form={match.awayTeamForm} />
                           </div>
                         </div>
 
                         {userPrediction && (
-                          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-800">
+                          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-800 mb-3">
                             <div className="flex items-center gap-2 text-sm">
                               <TrendingUp className="h-4 w-4 text-purple-600" />
                               <span className="font-medium">Tahmininiz:</span>
@@ -280,9 +338,37 @@ export default function Home() {
                             </div>
                           </div>
                         )}
+
+                        {!canPredict && !match.isFinished && (
+                          <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3 border border-amber-200 dark:border-amber-800 mb-3">
+                            <div className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400">
+                              <AlertCircle className="h-4 w-4" />
+                              <span>Maç başlangıcına 30 dakikadan az kaldı. Tahmin yapılamaz.</span>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setLocation(`/match/${match.id}`)}
+                          >
+                            <MessageSquare className="h-4 w-4 mr-2" />
+                            Yorumlar
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setLocation(`/match/${match.id}#stats`)}
+                          >
+                            <BarChart3 className="h-4 w-4 mr-2" />
+                            İstatistikler
+                          </Button>
+                        </div>
                       </div>
 
-                      {!match.isFinished && (
+                      {canPredict && (
                         <Button
                           onClick={() => openPredictionDialog(match)}
                           className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"

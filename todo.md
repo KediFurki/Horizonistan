@@ -40,3 +40,38 @@
 - [x] Kimlik doğrulama akışı test
 - [x] Mobil uyumluluk test
 - [x] Son kontroller ve hata düzeltmeleri
+
+## Yeni Özellikler (v2.0)
+
+### Kullanıcı Tahmin Geçmişi ve Zaman Kısıtlaması
+- [x] Kullanıcı tahmin geçmişi sayfası oluşturma (ana sayfada görüntüleniyor)
+- [x] Maç başlangıcından 30 dakika öncesine kadar tahmin güncelleme
+- [x] 30 dakikadan az kaldığında tahmin ekleme/güncelleme engelleme
+- [x] Zaman kısıtlaması için backend kontrolü
+
+### Admin İstatistik Paneli
+- [x] Maç bazında kullanıcı tahmin istatistikleri (backend)
+- [x] Hangi takımın daha çok seçildiğini gösteren grafik/yüzde (frontend)
+- [x] Admin paneline istatistik görünümü ekleme (maç detay sayfasında)
+
+### Yorum/Tartışma Sistemi
+- [x] Yorum veritabanı tablosu oluşturma
+- [x] Maç detay sayfası oluşturma
+- [x] Yorum ekleme/görüntüleme arayüzü
+- [x] Forum tarzı tartışma bölümü
+
+### Takım Logoları
+- [x] Takım logoları için veritabanı/dosya sistemi
+- [x] Premier League takım logoları toplama
+- [x] Takım adı ile logo otomatik eşleştirme
+- [x] Ana sayfada maç kartlarında logo gösterimi
+
+### Son 5 Maç Görselleştirme
+- [x] Son 5 maç istatistiklerini ana sayfada gösterme
+- [x] Renkli baloncuk tasarımı (Yeşil-G, Sarı-B, Kırmızı-M)
+- [x] Görsel iyileştirmeler
+
+### Logo Güncellemeleri
+- [x] Giriş/kayıt sayfası için özel logo ekleme
+- [x] Ana menüde Premier League logosu kullanma
+- [x] Logo dosyalarını projeye ekleme
